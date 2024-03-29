@@ -6,36 +6,21 @@ namespace Tamagotchi
     internal class Program
     {
         [DllImport("User32.dll", CharSet = CharSet.Unicode)]
-        public static extern int MessageBox(IntPtr h, string m, string c, int type);
-
-        private static readonly Random random = new();
-
-        public static readonly List<CommandData> commands = new()
-        {
-            new CommandData("help", Commands.Help, "Shows available commands - add parameter to get help on only one command"),
-            new CommandData("stats", Commands.ShowStats, "Shows your Tamagotchi's stats"),
-            new CommandData("feed", Commands.Feed, "Feed your Tamagotchi - add parameter to feed more or less"),
-            new CommandData("play", Commands.Play, "Play with your Tamagotchi - add parameter to play more or less"),
-            new CommandData("rename", Commands.Rename, "Rename your Tamagotchi - add paramter to skip prompt"),
-            new CommandData("clear", Commands.Clear, "Clear the console"),
-            new CommandData("kill", Commands.Kill, "Almost kill your Tamagothi (for debug purposes)"),
-            new CommandData("exit", Commands.Exit, "Exit the application")
-        };
-
+        private static extern int MessageBox(IntPtr h, string m, string c, int type);
         private static bool alive = true;
-        public static Stats? stats;
+        private static readonly Random random = new();
 
         static void Main()
         {
             // load stats
             if (File.Exists("save.json"))
             {
-                stats = SaveUtilities.GetStats();
+                Globals.stats = SaveUtilities.GetStats();
             }
             // create new tamagotchi
             else
             {
-                stats = new()
+                Globals.stats = new()
                 {
                     Hunger = 100,
                     Boredom = 0,
@@ -48,8 +33,8 @@ namespace Tamagotchi
                     name = Console.ReadLine();
                     Console.Clear();
                 }
-                stats.Name = name;
-                SaveUtilities.SaveStats(stats);
+                Globals.stats.Name = name;
+                SaveUtilities.SaveStats(Globals.stats);
             }
 
             AnsiConsole.Markup("run [green]help[/] to get started\r\n");
@@ -67,7 +52,7 @@ namespace Tamagotchi
                         Console.WriteLine("Please enter a command");
                         continue;
                     }
-                    List<CommandData> command = commands.Where(x => x.CommandName == input[0]).ToList();
+                    List<CommandData> command = Globals.commands.Where(x => x.CommandName == input[0]).ToList();
                     if (command.Count > 0)
                     {
                         command[0].Action(input[1..]);
@@ -89,15 +74,15 @@ namespace Tamagotchi
             // runs every 2 seconds
             statTimer.Elapsed += (s, e) =>
             {
-                if (stats != null)
+                if (Globals.stats != null)
                 {
                     // both hunger and boredom have a 1/5 chance of changing
                     if (random.Next(0, 4) == 0)
-                        stats.Hunger -= 5;
+                        Globals.stats.Hunger -= 5;
                     if (random.Next(0, 4) == 0)
-                        stats.Boredom += 5;
-                    SaveUtilities.SaveStats(stats);
-                    if (stats.Hunger < 0 || stats.Boredom > 100)
+                        Globals.stats.Boredom += 5;
+                    SaveUtilities.SaveStats(Globals.stats);
+                    if (Globals.stats.Hunger < 0 || Globals.stats.Boredom > 100)
                     {
                         statTimer.Stop();
                         SaveUtilities.ResetStats();
