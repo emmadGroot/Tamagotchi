@@ -76,7 +76,7 @@ namespace Tamagotchi
             {
                 if (Globals.stats != null)
                 {
-                    // both hunger and boredom have a 1/5 chance of changing
+                    // both hunger and boredom have a 1/4 chance of changing
                     if (random.Next(0, 4) == 0)
                         Globals.stats.Hunger -= 5;
                     if (random.Next(0, 4) == 0)
